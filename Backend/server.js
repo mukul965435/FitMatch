@@ -72,6 +72,18 @@ const socketHandler = require('./socket/socketHandler');
 socketHandler(io);
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+const serverInstance = server.listen(PORT, () => {
   console.log(`🚀 FitMatch server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
 });
+
+serverInstance.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n❌ Port ${PORT} is already in use.`);
+    console.error(`   Run this to free it:  netstat -ano | findstr :${PORT}`);
+    console.error(`   Then kill it with:    taskkill /F /PID <PID>\n`);
+    process.exit(1);
+  } else {
+    throw err;
+  }
+});
+

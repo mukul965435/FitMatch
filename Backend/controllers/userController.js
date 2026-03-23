@@ -47,12 +47,17 @@ const updateProfile = asyncHandler(async (req, res) => {
   if (workoutDays) user.workoutDays = Array.isArray(workoutDays) ? workoutDays : JSON.parse(workoutDays);
   if (locationName !== undefined) user.locationName = locationName;
 
-  // Update geolocation
+  // Update geolocation — only if valid numbers (guard against NaN/empty strings)
   if (longitude !== undefined && latitude !== undefined) {
-    user.location = {
-      type: 'Point',
-      coordinates: [parseFloat(longitude), parseFloat(latitude)],
-    };
+    const lng = parseFloat(longitude);
+    const lat = parseFloat(latitude);
+    if (isFinite(lng) && isFinite(lat)) {
+      user.location = {
+        type: 'Point',
+        coordinates: [lng, lat],
+      };
+    }
+    // If not finite, simply skip the location update (leave existing value)
   }
 
   const updatedUser = await user.save();
@@ -153,7 +158,8 @@ const discoverUsers = asyncHandler(async (req, res) => {
       .select('-password -sentRequests -receivedRequests -activities')
       .skip(skip)
       .limit(limit);
-    total = await User.countDocuments(geoQuery);
+    // countDocuments does NOT support $near, so we use the base query for total matching users
+    total = await User.countDocuments(query);
   } else {
     users = await User.find(query)
       .select('-password -sentRequests -receivedRequests -activities')

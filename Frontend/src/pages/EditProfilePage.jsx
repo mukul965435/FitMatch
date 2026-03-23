@@ -124,8 +124,18 @@ export default function EditProfilePage() {
     e.preventDefault()
     setIsLoading(true)
 
+    // Build payload — only include coordinates if they are real numbers
+    const payload = { ...form }
+    const lng = parseFloat(form.longitude)
+    const lat = parseFloat(form.latitude)
+    if (!isFinite(lng) || !isFinite(lat)) {
+      // Remove coords so backend doesn't receive NaN
+      delete payload.longitude
+      delete payload.latitude
+    }
+
     try {
-      const { data } = await axiosInstance.put('/users/profile', form)
+      const { data } = await axiosInstance.put('/users/profile', payload)
       updateUser(data.data)
       toast.success('Profile updated! 💪')
       navigate('/profile')

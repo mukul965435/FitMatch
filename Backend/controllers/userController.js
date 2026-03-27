@@ -306,6 +306,43 @@ const getActivityFeed = asyncHandler(async (req, res) => {
   res.json({ success: true, data: feed });
 });
 
+// @desc    Hype (like) an activity
+// @route   POST /api/users/activity/:activityId/hype
+// @access  Private
+const hypeActivity = asyncHandler(async (req, res) => {
+  const { activityId } = req.params;
+
+  // Find user who has this activity
+  const targetUser = await User.findOne({ 'activities._id': activityId });
+  if (!targetUser) {
+    res.status(404);
+    throw new Error('Activity not found');
+  }
+
+  const activity = targetUser.activities.id(activityId);
+  const userIdStr = req.user._id.toString();
+
+  const index = activity.likes.findIndex((id) => id.toString() === userIdStr);
+
+  if (index !== -1) {
+    // Unlike
+    activity.likes.splice(index, 1);
+  } else {
+    // Like
+    activity.likes.push(req.user._id);
+  }
+
+  await targetUser.save({ validateBeforeSave: false });
+
+  res.json({
+    success: true,
+    data: {
+      likes: activity.likes,
+      isLiked: index === -1,
+    },
+  });
+});
+
 module.exports = {
   getUserProfile,
   updateProfile,
@@ -314,4 +351,5 @@ module.exports = {
   rateUser,
   logActivity,
   getActivityFeed,
+  hypeActivity,
 };

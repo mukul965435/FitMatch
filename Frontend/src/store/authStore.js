@@ -10,10 +10,10 @@ const useAuthStore = create(
       isLoading: false,
       error: null,
 
-      register: async (name, email, password) => {
+      register: async (userData) => {
         set({ isLoading: true, error: null })
         try {
-          const { data } = await axiosInstance.post('/auth/register', { name, email, password })
+          const { data } = await axiosInstance.post('/auth/register', userData)
           set({ user: data.data, token: data.data.token, isLoading: false })
           return { success: true }
         } catch (err) {

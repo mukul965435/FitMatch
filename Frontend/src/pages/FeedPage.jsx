@@ -46,6 +46,23 @@ export default function FeedPage() {
     }
   }
 
+  const handleHype = async (activityId) => {
+    try {
+      const { data } = await axiosInstance.post(`/users/activity/${activityId}/hype`)
+      setFeed(prev => prev.map(item => {
+        if (item._id === activityId) {
+          return { ...item, likes: data.data.likes }
+        }
+        return item
+      }))
+      if (data.data.isLiked) {
+        toast('Hype! 💪', { icon: '🔥', style: { borderRadius: '10px', background: '#333', color: '#fff' } })
+      }
+    } catch (err) {
+      toast.error('Failed to hype activity')
+    }
+  }
+
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
       {/* Header */}
@@ -138,6 +155,7 @@ export default function FeedPage() {
         <div className="space-y-4">
           {feed.map((item, i) => {
             const isMe = item.user?._id === user?._id
+            const isHyped = item.likes?.includes(user?._id)
             return (
               <motion.div
                 key={i}
@@ -163,7 +181,21 @@ export default function FeedPage() {
                     {new Date(item.createdAt).toLocaleString()}
                   </p>
                 </div>
-                <span className="text-2xl">💪</span>
+                <div className="flex flex-col items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => handleHype(item._id)}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                      isHyped 
+                        ? 'bg-primary-500/20 text-primary-400' 
+                        : 'bg-dark-600/50 text-gray-400 hover:bg-dark-500'
+                    }`}
+                  >
+                    <span className="text-xl">💪</span>
+                  </button>
+                  <span className={`text-[10px] font-bold ${isHyped ? 'text-primary-400' : 'text-gray-500'}`}>
+                    {item.likes?.length || 0}
+                  </span>
+                </div>
               </motion.div>
             )
           })}

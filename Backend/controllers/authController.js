@@ -19,17 +19,14 @@ const register = asyncHandler(async (req, res) => {
     throw new Error('User already exists with this email');
   }
 
-  const user = await User.create({ name, email, password });
+  // Create user with all provided data (spread req.body)
+  const user = await User.create(req.body);
 
   if (user) {
     res.status(201).json({
       success: true,
       data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        profilePicture: user.profilePicture,
-        fitnessLevel: user.fitnessLevel,
+        ...user.toObject(),
         token: generateToken(user._id),
       },
     });

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { FiMapPin, FiClock, FiTarget, FiStar, FiUserPlus, FiMessageSquare } from 'react-icons/fi'
+import { FiMapPin, FiClock, FiTarget, FiStar, FiUserPlus, FiMessageSquare, FiZap } from 'react-icons/fi'
 
 const goalColors = {
   'fat loss': 'badge-green',
@@ -114,6 +114,15 @@ export default function BuddyCard({ user, onConnect, onMessage, requestSent, isM
               transition={{ duration: 0.8, delay: 0.2 }}
               className="h-full bg-gradient-to-r from-primary-500 to-primary-400 rounded-full"
             />
+          </div>
+          {/* Match Insight */}
+          <div className="mt-3 flex items-start gap-1.5 p-2 bg-primary-500/10 rounded-lg border border-primary-500/20">
+            <FiZap className="text-primary-400 text-xs shrink-0 mt-0.5" />
+            <p className="text-[10px] text-gray-400 leading-tight">
+              <span className="text-primary-400 font-bold uppercase tracking-wider">Insight:</span>{' '}
+              {score > 80 ? 'Perfect match! ' : score > 50 ? 'Strong potential. ' : 'Worth checking. '}
+              Great for {user.fitnessGoals?.[0] || 'working out'} together.
+            </p>
           </div>
         </div>
 
